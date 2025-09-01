@@ -59,14 +59,10 @@ for i, person in enumerate(all_characters, 1):
     print(f"\n{i}. {person['name']}")
     print(f"   Height: {person['height']}cm")
     print(f"   Mass: {person['mass']}kg")
-    print(f"   Hair Color: {person['hair_color']}")
-    print(f"   Skin Color: {person['skin_color']}")
-    print(f"   Eye Color: {person['eye_color']}")
     print(f"   Birth Year: {person['birth_year']}")
     print(f"   Gender: {person['gender']}")
 
 """
-
 print("\n" + "="*60)
 print(f"✅ Done! Retrieved ALL {len(all_characters)} characters from the Star Wars API.")
 
