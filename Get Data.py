@@ -10,7 +10,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Base URL for the Star Wars API
 base_url = "https://swapi.dev/api/"
 
-print("👥 Getting ALL Star Wars Characters Information...\n")
+print("Getting ALL Star Wars Characters Information...\n")
 
 # Get the first page to see total count
 first_response = requests.get(f"{base_url}people/", verify=False)
@@ -56,7 +56,7 @@ print("\n" + "="*60)
 
 """
 # Show all people
-print("\n📋 ALL Characters:")
+print("\n ALL Characters:")
 for i, person in enumerate(all_characters, 1):
     print(f"\n{i}. {person['name']}")
     print(f"   Height: {person['height']}cm")
@@ -66,7 +66,7 @@ for i, person in enumerate(all_characters, 1):
 
 """
 print("\n" + "="*60)
-print(f"✅ Done! Retrieved ALL {len(all_characters)} characters from the Star Wars API.")
+print(f"Done! Retrieved ALL {len(all_characters)} characters from the Star Wars API.")
 
 
 
@@ -101,7 +101,7 @@ def insert_people_to_db():
     # 4) Append to table 'people'; create if not exists
     df.to_sql("people", engine, if_exists="append", index=False)
 
-    print(f"✅ All done! Inserted {len(df)} rows into 'people' using pandas.to_sql")
+    print(f"All done! Inserted {len(df)} rows into 'people' using pandas.to_sql")
 
 # Insert into DB at the end of the script
 insert_people_to_db()
