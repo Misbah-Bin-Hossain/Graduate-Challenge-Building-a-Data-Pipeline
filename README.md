@@ -89,6 +89,36 @@ SELECT COUNT(*) FROM people;
 SELECT * FROM people LIMIT 10;
 ```
 
+## Automate Daily Run (Windows Task Scheduler)
+
+Create a small PowerShell script to run the pipeline and schedule it daily with Task Scheduler.
+
+1) Create `run_pipeline.ps1` in the project directory
+```powershell
+Set-Location "C:\Github\The challenge\Graduate-Challenge-Building-a-Data-Pipeline"
+docker-compose up -d
+python ".\Get Data.py" *>> ".\pipeline.log"
+```
+
+2) Create a scheduled task
+- Open Task Scheduler → Create Task…
+- General: Name = StarWarsPipelineDaily; Run whether user is logged on or not
+- Triggers: New → Daily → set time
+- Actions: New → Start a program
+  - Program/script: powershell.exe
+  - Add arguments: `-ExecutionPolicy Bypass -File "C:\Github\The challenge\Graduate-Challenge-Building-a-Data-Pipeline\run_pipeline.ps1"`
+  - Start in: `C:\Github\The challenge\Graduate-Challenge-Building-a-Data-Pipeline`
+- Settings: Enable "Run task as soon as possible after a scheduled start is missed"
+
+3) Test the task
+- Right-click the task → Run
+- Check `pipeline.log` for output and errors
+
+Notes
+- Ensure Python and required packages are installed on the machine (use `pip install -r requirements.txt`).
+- If you prefer a fixed Python, use its full path in the script (for example, `C:\Users\<you>\AppData\Local\Microsoft\WindowsApps\python3.11.exe`).
+- If you see encoding errors in logs, remove emojis from prints (already done) or run Python with UTF-8: `python -X utf8 ".\Get Data.py"`.
+
 ## Project Structure
 
 ```
