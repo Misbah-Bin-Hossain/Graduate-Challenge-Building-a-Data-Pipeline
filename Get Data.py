@@ -10,15 +10,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Base URL for the Star Wars API
 base_url = "https://swapi.dev/api/"
 
-print("Getting ALL Star Wars Characters Information...\n")
+print("Getting Star Wars Characters Data\n\n")
 
 # Get the first page to see total count
 first_response = requests.get(f"{base_url}people/", verify=False)
 first_data = first_response.json()
 total_people = first_data['count']
-print(f"Total people available: {total_people}")
+print(f"Total people available: {total_people} \n")
 
-print("\n" + "="*60)
 
 # Function to get all people from all pages
 def get_all_people():
@@ -42,7 +41,7 @@ def get_all_people():
             break
             
         all_people.extend(data['results'])
-        print(f"Retrieved page {page} with {len(data['results'])} characters")
+        print(f"Retrieved {len(data['results'])} characters from page{page}")
         page += 1
     
     return all_people
@@ -50,34 +49,11 @@ def get_all_people():
 # Get all people
 print("Fetching all characters from all pages...")
 all_characters = get_all_people()
-print(f"Successfully retrieved {len(all_characters)} characters!")
-
-print("\n" + "="*60)
-
-"""
-# Show all people
-print("\n ALL Characters:")
-for i, person in enumerate(all_characters, 1):
-    print(f"\n{i}. {person['name']}")
-    print(f"   Height: {person['height']}cm")
-    print(f"   Mass: {person['mass']}kg")
-    print(f"   Birth Year: {person['birth_year']}")
-    print(f"   Gender: {person['gender']}")
-
-"""
-print("\n" + "="*60)
-print(f"Done! Retrieved ALL {len(all_characters)} characters from the Star Wars API.")
+print(f"Successfully got data of {len(all_characters)} characters from API\n")
 
 
-
+# Function to insert data into database
 def insert_people_to_db():
-    """
-    Insert the already-fetched `all_characters` into PostgreSQL using pandas.to_sql.
-
-    - Reuses the global `all_characters` variable (no re-fetching)
-    - Uses pandas/SQLAlchemy (no cursors)
-    - Creates table `people` automatically if it doesn't exist
-    """
 
     # 1) Convert the list of characters to simple rows
     simple_rows = []
@@ -101,7 +77,7 @@ def insert_people_to_db():
     # 4) Append to table 'people'; create if not exists
     df.to_sql("people", engine, if_exists="append", index=False)
 
-    print(f"All done! Inserted {len(df)} rows into 'people' using pandas.to_sql")
+    print(f"\nInserted {len(df)} rows into Table: 'people' of DB: starwars_db using pandas\n")
 
 # Insert into DB at the end of the script
 insert_people_to_db()
