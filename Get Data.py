@@ -1,6 +1,8 @@
 import requests
 import json
 import urllib3
+import pandas as pd
+from sqlalchemy import create_engine
 
 # Disable SSL warnings (since we're dealing with an expired certificate)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -33,7 +35,7 @@ def get_all_people():
             break
             
         data = response.json()
-        
+
         # Check if we have results and if they're valid
         if 'results' not in data or not data['results']:
             print(f"No more results on page {page}")
@@ -46,7 +48,7 @@ def get_all_people():
     return all_people
 
 # Get all people
-print("🔄 Fetching all characters from all pages...")
+print("Fetching all characters from all pages...")
 all_characters = get_all_people()
 print(f"Successfully retrieved {len(all_characters)} characters!")
 
@@ -66,3 +68,40 @@ for i, person in enumerate(all_characters, 1):
 print("\n" + "="*60)
 print(f"✅ Done! Retrieved ALL {len(all_characters)} characters from the Star Wars API.")
 
+
+
+def insert_people_to_db():
+    """
+    Insert the already-fetched `all_characters` into PostgreSQL using pandas.to_sql.
+
+    - Reuses the global `all_characters` variable (no re-fetching)
+    - Uses pandas/SQLAlchemy (no cursors)
+    - Creates table `people` automatically if it doesn't exist
+    """
+
+    # 1) Convert the list of characters to simple rows
+    simple_rows = []
+    for person in all_characters:
+        simple_rows.append({
+            "name": person.get("name"),
+            "height": person.get("height"),
+            "mass": person.get("mass"),
+            "birth_year": person.get("birth_year"),
+            "gender": person.get("gender"),
+        })
+
+    # 2) Create DataFrame
+    df = pd.DataFrame(simple_rows)
+
+    # 3) Create SQLAlchemy engine (credentials from docker-compose.yml)
+    engine = create_engine(
+        "postgresql+psycopg2://starwars_misbah:misbah@localhost:5432/starwars_db"
+    )
+
+    # 4) Append to table 'people'; create if not exists
+    df.to_sql("people", engine, if_exists="append", index=False)
+
+    print(f"✅ All done! Inserted {len(df)} rows into 'people' using pandas.to_sql")
+
+# Insert into DB at the end of the script
+insert_people_to_db()

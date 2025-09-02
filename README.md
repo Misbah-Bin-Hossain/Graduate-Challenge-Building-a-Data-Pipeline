@@ -1,105 +1,134 @@
-# Star Wars Data Pipeline Project
+# Star Wars Data Pipeline
 
-This project demonstrates how to build a data pipeline that extracts data from the Star Wars API (SWAPI) and stores it in a PostgreSQL database.
+This project fetches data from the Star Wars API (SWAPI) and stores it in a PostgreSQL database using Python and pandas.
 
 ## Prerequisites
 
-- Docker and Docker Compose installed on your system
+- Docker and Docker Compose installed
 - Python 3.7 or higher
-- Required Python packages (see requirements.txt)
+- Install packages from `requirements.txt`
 
-## Step 2: Set Up PostgreSQL Using Docker
+## Database Setup (Docker Compose)
 
-### What is Docker Compose?
+Run the following in Windows PowerShell from the project directory.
 
-Docker Compose is a tool that allows you to define and run multi-container Docker applications. In our case, we'll use it to run a PostgreSQL database container.
+Start the database
+```powershell
+docker-compose up -d
+```
 
-### Starting the Database
+Check that the container is running
+```powershell
+docker ps
+```
 
-1. **Open your terminal/command prompt** in the project directory
-2. **Start the PostgreSQL container** by running:
-   ```bash
-   docker-compose up -d
-   ```
-   The `-d` flag runs the container in the background (detached mode)
+Database connection details
 
-3. **Verify the container is running**:
-   ```bash
-   docker ps
-   ```
-   You should see a container named `starwars_postgres` running
+- Host: localhost
+- Port: 5432
+- Database: starwars_db
+- Username: starwars_misbah
+- Password: misbah
 
-4. **Check the logs** (optional):
-   ```bash
-   docker-compose logs postgres
-   ```
-
-### Database Connection Details
-
-- **Host**: localhost
-- **Port**: 5432
-- **Database**: starwars_db
-- **Username**: starwars_user
-- **Password**: starwars_password
-
-### Stopping the Database
-
-When you're done working:
-```bash
+Stop the database when finished
+```powershell
 docker-compose down
 ```
 
-To also remove the data volume (this will delete all data):
-```bash
+Remove the database and its data (use with care)
+```powershell
 docker-compose down -v
 ```
 
-### Troubleshooting
+## How to Run the Pipeline
 
-**If you get a port conflict error:**
-- Another PostgreSQL instance might be running on port 5432
-- Change the port in `docker-compose.yml` from `"5432:5432"` to `"5433:5432"`
+Install Python dependencies
+```powershell
+pip install -r requirements.txt
+```
 
-**If the container won't start:**
-- Check if Docker is running
-- Ensure no other containers are using the same name
-- Check the logs: `docker-compose logs postgres`
+Run the script that fetches and inserts data
+```powershell
+python ".\Get Data.py"
+```
+
+## What the Script Does
+
+1. Calls function `get_all_people` to fetch all people from SWAPI.
+2. Saves the results in variable `all_characters`.
+3. Calls function `insert_people_to_db` to write the data into PostgreSQL using pandas `to_sql` into a table named `people`.
+
+## Functions Used
+
+- `get_all_people`: requests data from SWAPI across all pages.
+- `insert_people_to_db`: converts data into a pandas DataFrame and inserts into PostgreSQL using SQLAlchemy engine and pandas `to_sql`.
+
+## Libraries Used
+
+- `requests`: HTTP requests to the API
+- `urllib3`: disables SSL warning for this API call
+- `pandas`: tabular data handling and `to_sql` insertion
+- `sqlalchemy`: database engine creation for pandas
+- `psycopg2` (used via SQLAlchemy): PostgreSQL driver
+
+## Verify Data
+
+Method 1: simple check script
+```powershell
+python ".\check data.py"
+```
+
+Method 2: psql inside the container
+```powershell
+docker exec -it starwars_postgres psql -U starwars_misbah -d starwars_db
+```
+Then run inside psql
+```
+\dt
+SELECT COUNT(*) FROM people;
+SELECT * FROM people LIMIT 10;
+```
 
 ## Project Structure
 
 ```
-├── docker-compose.yml          # Docker configuration for PostgreSQL
-├── discover_api_fixed.py       # Script to explore SWAPI
-├── Get Data.py                 # Script to get Star Wars data
+├── docker-compose.yml          # PostgreSQL container configuration
+├── Get Data.py                 # Fetches SWAPI people and inserts into Postgres
+├── check data.py               # Preview of inserted data using pandas and SQLAlchemy
 ├── requirements.txt            # Python dependencies
-└── README.md                   # This file
+└── README.md                   # This guide
 ```
 
-## Next Steps
+## Troubleshooting
 
-After setting up the database, you can:
-1. Create database tables for Star Wars data
-2. Modify the Python scripts to save data to PostgreSQL
-3. Build a complete ETL pipeline
+- If port 5432 is busy, change `docker-compose.yml` ports from "5432:5432" to "5433:5432" and connect to `localhost:5433` in the scripts.
+- If the container does not start, ensure Docker is running and check logs with
+```powershell
+docker-compose logs postgres
+```
+- If modules are missing, reinstall requirements
+```powershell
+pip install -r requirements.txt
+```
 
-## Useful Docker Commands
+## Quick Reference
 
-```bash
-# Start services
+Start DB
+```powershell
 docker-compose up -d
+```
 
-# Stop services
-docker-compose down
+Install packages
+```powershell
+pip install -r requirements.txt
+```
 
-# View running containers
-docker ps
+Run pipeline
+```powershell
+python ".\Get Data.py"
+```
 
-# View logs
-docker-compose logs
-
-# Restart services
-docker-compose restart
-
-# Remove everything including volumes
-docker-compose down -v
+Check data
+```powershell
+python ".\check data.py"
 ```
